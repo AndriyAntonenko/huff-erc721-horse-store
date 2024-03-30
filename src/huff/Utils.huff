@@ -1,0 +1,18 @@
+#define macro _NON_PAYABLE() = takes (0) returns (0) {
+  0x00                            // [0x00]
+  callvalue                       // [msg.value, 0x00]
+  eq                              // [msg.value == 0x00]
+  continue_jump_dest jumpi
+  0x00 0x00 revert
+  continue_jump_dest:         // []
+}
+
+/// @notice Retrives an "immutable" from the runtime bytecode. Borrowed from the huffmate library
+#define macro _GET_IMMUTABLE(offset_end, free_memory) = takes (0) returns (1) {
+  // each immutable is stored as a 32-byte word
+  0x20                        // [size]
+  <offset_end> codesize sub   // [offset_code, size]
+  <free_memory>               // [offset_memory, offset_code, size]
+  codecopy                    // []
+  <free_memory> mload         // [value]
+}

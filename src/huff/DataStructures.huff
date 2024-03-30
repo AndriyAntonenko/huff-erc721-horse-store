@@ -1,0 +1,33 @@
+#define macro _HASHMAP_GET_SLOT_FROM_KEYS(memory_ptr) = takes(2) returns (1) {
+  // input stack: [key, slot]
+  <memory_ptr>           // [memory_ptr, key, slot]
+  mstore                 // [slot]
+  <memory_ptr> 0x20 add  // [memory_ptr + 0x20, slot]
+  mstore
+  0x40 <memory_ptr> sha3 // [keccak256(key | slot)]
+}
+
+#define macro _HASHMAP_2D_GET_SLOT_FROM_KEYS(memory_ptr) = takes(3) returns (1) {
+  // example: p[x][y]
+  // input stack:  [p, x, y]
+  <memory_ptr> 0x20 add // [memory_ptr + 0x20, p, x, y]
+  mstore                // [x, y]
+  <memory_ptr>
+  mstore                 // [y]
+  0x40 <memory_ptr> sha3 // [keccak256(p | x), y]
+
+  swap1                  // [y, keccak256(p | x)]
+  <memory_ptr>
+  mstore                 // [keccak256(p | x)]
+  <memory_ptr> 0x20 add  // [memory_ptr + 0x20, keccak256(p | x)]
+  mstore                 // [keccak256(p | x)]
+  0x40 <memory_ptr> sha3 // [keccak256(keccak256(p | x), y)]
+}
+
+#define macro _HASHMAP_ARRAY_GET_SLOT_FROM_KEYS(memory_ptr) = takes(2) returns (1) {
+  // input stack: [slot, index]
+  <memory_ptr>           // [memory_ptr, slot, index]
+  mstore                 // [index]
+  0x20 <memory_ptr> sha3 // [keccak256(slot), index)]
+  add                    // [keccak256(slot) + index]
+}
