@@ -414,6 +414,14 @@ abstract contract HorseStoreTest is Test {
     horseStore.tokenOfOwnerByIndex(randomReceiver, 2);
   }
 
+  function testSupportsInterface() public {
+    bytes4 erc721Interface = 0x80ac58cd;
+    bytes4 erc721EnumerableInterface = 0x780e9d63;
+
+    assertEq(horseStore.supportsInterface(erc721Interface), true);
+    assertEq(horseStore.supportsInterface(erc721EnumerableInterface), true);
+  }
+
   /*//////////////////////////////////////////////////////////////
                             HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////*/

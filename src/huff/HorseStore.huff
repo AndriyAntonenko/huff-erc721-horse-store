@@ -32,13 +32,13 @@
 // #define function safeTransferFrom(address,address, uint256, bytes) nonpayable returns ()
 // #define function safeTransferFrom(address,address, uint256) nonpayable returns ()
 
-// 0x23b872dd
-
 // IERC721Enumerable
 #define function tokenByIndex(uint256 index) view returns (uint256)
 #define function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)
 
-// @TODO: ERC165
+// ERC165
+#define function supportsInterface(bytes4) view returns (bool)
+
 // @TODO: Add metadata
 
 /**********************************************************************
@@ -67,6 +67,9 @@
 #define constant NAME_LENGTH_OFFSET                = 0x00000000000000000000000000000000000000000000000000000000000000a0
 #define constant SYMBOL_OFFSET                     = 0x0000000000000000000000000000000000000000000000000000000000000020
 #define constant SYMBOL_LENGTH_OFFSET              = 0x0000000000000000000000000000000000000000000000000000000000000040
+
+#define constant ERC721_INTERFACE_ID               = 0x80ac58cd00000000000000000000000000000000000000000000000000000000
+#define constant ERC721_ENUMERABLE_INTERFACE_ID    = 0x780e9d6300000000000000000000000000000000000000000000000000000000
 
 /**********************************************************************
 * Storage                                                             *
@@ -138,7 +141,10 @@
   eq token_of_owner_by_index_dest jumpi      // [function_selector]
 
   dup1 __FUNC_SIG(tokenByIndex)              // [__FUNC_SIG(tokenByIndex), function_selector, function_selector]
-  eq token_by_index_dest jumpi // [function_selector]
+  eq token_by_index_dest jumpi               // [function_selector]
+
+  dup1 __FUNC_SIG(supportsInterface)         // [__FUNC_SIG(supportsInterface), function_selector, function_selector]
+  eq supports_interface_dest jumpi           // [function_selector]
 
   0x00 0x00 revert                           // [0x00, 0x00] -> []
 
@@ -177,6 +183,8 @@
     pop ERC721_ENUMERABLE_TOKEN_OF_OWNER_BY_INDEX()
   token_by_index_dest:
     pop ERC721_ENUMERABLE_TOKEN_BY_INDEX()
+  supports_interface_dest:
+    pop ERC165_SUPPORTS_INTERFACE()
 }
 
 /**********************************************************************
@@ -464,6 +472,28 @@
     0x04 mstore                             // [index]
     0x24 mstore                             // []
     0x44 0x00 revert
+}
+
+/**********************************************************************
+* ERC165 Enumerable Internal                                          *
+***********************************************************************/
+
+#define macro ERC165_SUPPORTS_INTERFACE() = takes(0) returns(0) {
+  0x04 calldataload                      // [interface_id]
+
+  [ERC721_INTERFACE_ID] eq               // [erc721_id == interface_id]
+  return_true_dest jumpi
+
+  0x04 calldataload                      // [interface_id]
+  [ERC721_ENUMERABLE_INTERFACE_ID] eq    // [erc721_enumerable_id == interface_id]
+  return_true_dest jumpi                 // []
+
+  0x00 0x00 return
+
+  return_true_dest:
+    0x01
+    0x00 mstore
+    0x20 0x00 return
 }
 
 
