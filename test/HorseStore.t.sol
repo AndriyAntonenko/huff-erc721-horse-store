@@ -389,6 +389,31 @@ abstract contract HorseStoreTest is Test {
     horseStore.tokenByIndex(1);
   }
 
+  function testTransferFromChangesTokenOwnerEnumeration(address randomOwner, address randomReceiver) public {
+    vm.assume(randomOwner != randomReceiver);
+    vm.assume(randomOwner != address(0));
+    vm.assume(!_isContract(randomOwner));
+    vm.assume(randomReceiver != address(0));
+    vm.assume(!_isContract(randomReceiver));
+
+    vm.startPrank(randomOwner);
+    horseStore.mintHorse(); // token id 0, index 0
+    horseStore.mintHorse(); // token id 1, index 1
+    horseStore.mintHorse(); // token id 2, index 2
+    vm.stopPrank();
+
+    uint256 tokenId = 1;
+    vm.prank(randomOwner);
+    horseStore.transferFrom(randomOwner, randomReceiver, tokenId);
+
+    assertEq(horseStore.tokenOfOwnerByIndex(randomOwner, 0), 0);
+    assertEq(horseStore.tokenOfOwnerByIndex(randomOwner, 1), 2);
+    assertEq(horseStore.tokenOfOwnerByIndex(randomReceiver, 0), tokenId);
+
+    vm.expectRevert();
+    horseStore.tokenOfOwnerByIndex(randomReceiver, 2);
+  }
+
   /*//////////////////////////////////////////////////////////////
                             HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////*/

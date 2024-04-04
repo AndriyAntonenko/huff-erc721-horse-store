@@ -24,13 +24,15 @@
 #define function name() nonpayable returns (string)
 #define function symbol() nonpayable returns (string)
 #define function totalSupply() nonpayable returns (uint256)
-#define function transferFrom(address,address, uint256) nonpayable returns ()
+#define function transferFrom(address,address,uint256) nonpayable returns ()
 #define function approve(address,uint256) nonpayable returns ()
 #define function getApproved(uint256) nonpayable returns (address)
 #define function setApprovalForAll(address,bool) nonpayable returns ()
 #define function isApprovedForAll(address,address) nonpayable returns (bool)
 // #define function safeTransferFrom(address,address, uint256, bytes) nonpayable returns ()
 // #define function safeTransferFrom(address,address, uint256) nonpayable returns ()
+
+// 0x23b872dd
 
 // IERC721Enumerable
 #define function tokenByIndex(uint256 index) view returns (uint256)
@@ -192,7 +194,7 @@
 #define macro FEED_HORSE() = takes(0) returns (0) {
   _NON_PAYABLE()
 
-  [OWNER_LOCATION]            // [OWNER_LOCATION, token_id]
+  [OWNER_LOCATION]                         // [OWNER_LOCATION, token_id]
   0x04 calldataload                        // [token_id, OWNER_LOCATION]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)        // [token_owner_slot]
   sload                                    // [owner]
@@ -201,7 +203,7 @@
   forbidden_jump_dest jumpi                // []
 
   timestamp                                // [timestamp]
-  [HORSE_FED_TIMESTAMPS_LOCATION]      // [HORSE_FED_TIMESTAMPS_LOCATION, timestamp]
+  [HORSE_FED_TIMESTAMPS_LOCATION]          // [HORSE_FED_TIMESTAMPS_LOCATION, timestamp]
   0x04 calldataload                        // [token_id, HORSE_FED_TIMESTAMPS_LOCATION, timestamp]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)        // [timestamp_slot, timstamp]
   sstore                                   // []
@@ -222,11 +224,11 @@
   caller                                  // [caller, token_id, token_id]
   swap1                                   // [token_id, caller, token_id]
 
-  [OWNER_LOCATION] swap1     // [token_id, OWNER_LOCATION, caller, token_id]
+  [OWNER_LOCATION] swap1                  // [token_id, OWNER_LOCATION, caller, token_id]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)       // [token_owner_slot, caller, token_id]
   sstore                                  // [token_id]
 
-  [BALANCE_LOCATION]          // [BALANCE_LOCATION, token_id]
+  [BALANCE_LOCATION]                       // [BALANCE_LOCATION, token_id]
   caller                                   // [msg.sender, BALANCE_LOCATION, token_id]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)        // [balance_slot, token_id]
   dup1                                     // [balance_slot, balance_slot, token_id]
@@ -234,16 +236,15 @@
   0x01 add                                 // [prev_balance + 1, balance_slot, token_id]
   swap1                                    // [balance_slot, balances[msg.sender] + 1, token_id]
   sstore                                   // [token_id]
+  dup1                                     // [token_id, token_id]
 
-  dup1                                              // [token_id, token_id]
   _ERC721_ENUMERABLE_ADD_TO_ALL_TOKENS_ENURATIONS() // [token_id]
-
   dup1                                              // [token_id, token_id]
   caller                                            // [msg.sender, token_id, token_id]
   _ERC721_ENUMERABLE_ADD_TO_OWNER_ENUMERATIONS()    // [token_id]
 
-  caller 0x00                              // [from (0x00), to (msg.sender), token_id]
-  __EVENT_HASH(Transfer)                   // [event_hash, from (0x00), to (msg.sender), token_id]
+  caller 0x00                                       // [from (0x00), to (msg.sender), token_id]
+  __EVENT_HASH(Transfer)                            // [event_hash, from (0x00), to (msg.sender), token_id]
   0x00 0x00 log4
   0x00 0x00 return
 }
@@ -254,7 +255,7 @@
 
 /// @notice Is Happy Horse
 #define macro IS_HAPPY_HORSE() = takes(0) returns (0) {
-  [HORSE_FED_TIMESTAMPS_LOCATION]      // [HORSE_FED_TIMESTAMPS_LOCATION]
+  [HORSE_FED_TIMESTAMPS_LOCATION]          // [HORSE_FED_TIMESTAMPS_LOCATION]
   0x04 calldataload                        // [token_id, HORSE_FED_TIMESTAMPS_LOCATION]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)        // [timestamp_slot]
   sload                                    // [fed_timestamp]
@@ -284,7 +285,7 @@
 
 /// @notice Horse Id To Fed Timestamp
 #define macro HORSE_ID_TO_FED_TIMESTAMP() = takes(0) returns (0) {
-  [HORSE_FED_TIMESTAMPS_LOCATION]     // [HORSE_FED_TIMESTAMPS_LOCATION]
+  [HORSE_FED_TIMESTAMPS_LOCATION]         // [HORSE_FED_TIMESTAMPS_LOCATION]
   0x04 calldataload                       // [token_id, HORSE_FED_TIMESTAMPS_LOCATION]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)       // [timestamp_slot]
   sload                                   // [timestamp]
@@ -330,7 +331,7 @@
 /// @notice Total Supply
 /// @notice Returns the total number of tokens in existence
 #define macro ERC721_TOTAL_SUPPLY() = takes (0) returns (0) {
-  [ALL_TOKENS_LOCATION]                  // [ALL_TOKENS_LOCATION]
+  [ALL_TOKENS_LOCATION]                      // [ALL_TOKENS_LOCATION]
   sload                                      // [total_supply]
   0x00 mstore                                // []
   0x20 0x00 return                           // []
@@ -354,7 +355,7 @@
   dup1                                    // [token_id, token_id, spender]
   _ONLY_OWNER()                           // [token_id, spender]
   dup2 dup2                               // [token_id, spender, token_id, spender]
-  [APPROVALS_LOCATION]          // [APPROVALS_LOCATION, token_id, spender, token_id, spender]
+  [APPROVALS_LOCATION]                    // [APPROVALS_LOCATION, token_id, spender, token_id, spender]
   swap1                                   // [token_id, APPROVALS_LOCATION, spender, token_id spender]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)       // [approval_slot, spender, token_id, spender]
   sstore                                  // [token_id, spender]
@@ -375,15 +376,15 @@
 
 #define macro ERC721_SET_APPROVAL_FOR_ALL() = takes(0) returns(0) {
   _NON_PAYABLE()
-  0x04 calldataload                       // [approved]
-  0x24 calldataload                       // [operator, approved]
-  swap1                                   // [approved, operator]
+  0x04 calldataload                      // [approved]
+  0x24 calldataload                      // [operator, approved]
+  swap1                                  // [approved, operator]
 
-  _VALIDATE_OPERATOR()                    // [operator, approved]
+  _VALIDATE_OPERATOR()                   // [operator, approved]
 
   caller                                 // [msg.sender, operator, approved]
   dup3 dup3 dup3                         // [msg.sender, operator, approved, msg.sender, operator, approved] 
-  [OPERATOR_APPROVALS_LOCATION]      // [OPERATOR_APPROVALS_LOCATION, msg.sender, operator, approved, msg.sender, operator, approved]
+  [OPERATOR_APPROVALS_LOCATION]          // [OPERATOR_APPROVALS_LOCATION, msg.sender, operator, approved, msg.sender, operator, approved]
   _HASHMAP_2D_GET_SLOT_FROM_KEYS(0x00)   // [approval_slot, approved, msg.sender, operator, approved]
   sstore                                 // [msg.sender, operator, approved]
 
@@ -429,7 +430,7 @@
   iszero                                   // [balance <= index, owner, index]
   out_of_bounds_jump_dest jumpi            // [owner, index]
 
-  [OWNED_TOKENS_LOCATION]              // [OWNED_TOKENS_LOCATION, owner, index]
+  [OWNED_TOKENS_LOCATION]                  // [OWNED_TOKENS_LOCATION, owner, index]
   _HASHMAP_2D_GET_SLOT_FROM_KEYS(0x00)     // [slot]
   sload                                    // [token_id]
   0x00 mstore
@@ -451,7 +452,7 @@
   gt iszero                                // [total_supply <= index, index]
   out_of_bounds_jump_dest jumpi            // [index]
 
-  [ALL_TOKENS_LOCATION]                // [ALL_TOKENS_LOCATION, index]
+  [ALL_TOKENS_LOCATION]                    // [ALL_TOKENS_LOCATION, index]
   _HASHMAP_ARRAY_GET_SLOT_FROM_KEYS(0x00)  // [slot]
   sload                                    // [token_id]
   0x00 mstore
@@ -481,13 +482,13 @@
   dup1                                       // [index, index, owner, token_id, token_id]
   swap2                                      // [owner, index, index, token_id, token_id]
 
-  [OWNED_TOKENS_LOCATION]                // [OWNED_TOKENS_LOCATION, owner, index, index, token_id, token_id]
+  [OWNED_TOKENS_LOCATION]                    // [OWNED_TOKENS_LOCATION, owner, index, index, token_id, token_id]
   _HASHMAP_2D_GET_SLOT_FROM_KEYS(0x00)       // [owned_tokens_slot, index, token_id, token_id]
   swap1 swap2 swap1                          // [owned_tokens_slot, token_id, index, token_id]
   sstore                                     // [index, token_id]
 
   swap1                                      // [token_id, index]
-  [OWNED_TOKENS_INDEX_LOCATION]          // [OWNED_TOKENS_INDEX_LOCATION, token_id, index]
+  [OWNED_TOKENS_INDEX_LOCATION]              // [OWNED_TOKENS_INDEX_LOCATION, token_id, index]
   swap1                                      // [token_id, OWNED_TOKENS_INDEX_LOCATION, index]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)          // [slot, index]
   sstore                                     // [index]
@@ -496,26 +497,76 @@
 #define macro _ERC721_ENUMERABLE_ADD_TO_ALL_TOKENS_ENURATIONS() = takes(1) returns(0) {
   // input stack: [token_id]
   dup1
-  [ALL_TOKENS_LOCATION]                 // [index, token_id, token_id]
-  [ALL_TOKENS_INDEX_LOCATION]           // [ALL_TOKENS_INDEX_LOCATION, index, token_id, token_id]
+  [ALL_TOKENS_LOCATION]                     // [index, token_id, token_id]
+  [ALL_TOKENS_INDEX_LOCATION]               // [ALL_TOKENS_INDEX_LOCATION, index, token_id, token_id]
   swap1                                     // [index, ALL_TOKENS_INDEX_LOCATION, token_id, token_id]
   swap2                                     // [token_id, ALL_TOKENS_INDEX_LOCATION, index, token_id]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)         // [_allTokensIndex_slot, index, token_id]
   sstore                                    // [token_id]
 
-  [ALL_TOKENS_LOCATION]                 // [ALL_TOKENS_LOCATION, token_id] 
+  [ALL_TOKENS_LOCATION]                     // [ALL_TOKENS_LOCATION, token_id] 
   dup1                                      // [ALL_TOKENS_LOCATION, ALL_TOKENS_LOCATION, token_id]
   sload                                     // [length, ALL_TOKENS_LOCATION, token_id]
   swap1                                     // [ALL_TOKENS_LOCATION, length, token_id]
   _HASHMAP_ARRAY_GET_SLOT_FROM_KEYS(0x00)   // [slot, token_id]
   sstore                                    // []
 
-  [ALL_TOKENS_LOCATION]                 // [ALL_TOKENS_LOCATION]
+  [ALL_TOKENS_LOCATION]                     // [ALL_TOKENS_LOCATION]
   dup1                                      // [ALL_TOKENS_LOCATION, ALL_TOKENS_LOCATION]
   sload                                     // [length, ALL_TOKENS_LOCATION]
   0x01 add                                  // [length + 1, ALL_TOKENS_LOCATION]
   swap1                                     // [ALL_TOKENS_LOCATION, length + 1]
   sstore                                    // []
+}
+
+#define macro _ERC721_ENUMERABLE_REMOVE_TOKEN_FROM_OWNER_ENUMERATION() = takes(2) returns(0) {
+  // input stack: [from, token_id]
+  dup2 dup2                                 // [from, token_id, from, token_id]
+  _ERC721_BALANCE_OF()                      // [last_token_index, token_id, from, token_id]
+  swap1                                     // [token_id, last_token_index, from, token_id]
+  
+  [OWNED_TOKENS_INDEX_LOCATION] swap1       // [token_id, OWNED_TOKENS_INDEX_LOCATION, last_token_index, from, token_id]
+  _HASHMAP_GET_SLOT_FROM_KEYS(0x00) sload   // [token_index, last_token_index, from, token_id]
+  dup2 dup2                                 // [token_index, last_token_index, token_index, last_token_index, from, token_id]
+  eq                                        // [token_index == last_token_index, token_index, last_token_index, from, token_id]
+  remove_and_pop_dest jumpi                 // [token_index, last_token_index, from, token_id]
+
+  swap2                                     // [from, last_token_index, token_index, token_id]
+  dup2 dup2                                 // [from, last_token_index, from, last_token_index, token_index, token_id]
+  [OWNED_TOKENS_LOCATION]                   // [OWNED_TOKENS_LOCATION, from, last_token_index, from, last_token_index, token_index, token_id]
+  _HASHMAP_2D_GET_SLOT_FROM_KEYS(0x00)      // [owned_tokens_slot, from, last_token_index, token_index, token_id]
+  sload                                     // [last_token_id, from, last_token_index, token_index, token_id]
+
+  swap3                                     // [token_index, from, last_token_index, last_token_id, token_id]
+  swap1                                     // [from, token_index, last_token_index, last_token_id, token_id]
+  dup2 dup2                                 // [from, token_index, from, token_index, last_token_index, last_token_id, token_id]
+  
+  [OWNED_TOKENS_LOCATION]                   // [OWNED_TOKENS_LOCATION, from, token_index, from, token_index, last_token_index, last_token_id, token_id]
+  _HASHMAP_2D_GET_SLOT_FROM_KEYS(0x00)      // [slot, from, token_index, last_token_index, last_token_id, token_id]
+
+  swap1                                     // [from, slot, token_index, last_token_index, last_token_id, token_id]
+  swap4                                     // [last_token_id, slot, token_index, last_token_index, from, token_id]
+  dup1                                      // [last_token_id, last_token_id, slot, token_index, last_token_index, from, token_id]
+  swap2                                     // [slot, last_token_id, last_token_id, token_index, last_token_index, from, token_id]
+  sstore                                    // [last_token_id, token_index, last_token_index, from, token_id]  
+
+  [OWNED_TOKENS_INDEX_LOCATION]             // [OWNED_TOKENS_INDEX_LOCATION, last_token_id, token_index, last_token_index, from, token_id]
+  swap1 _HASHMAP_GET_SLOT_FROM_KEYS(0x00)   // [slot, token_index, last_token_index, from, token_id]
+  sstore                                    // [last_token_index, from, token_id]
+  remove_dest jump
+
+  remove_and_pop_dest:
+    pop
+
+  remove_dest:                              // [last_token_index, from, token_id]
+  swap1                                     // [from, last_token_index, token_id]
+  [OWNED_TOKENS_LOCATION]                   // [OWNED_TOKENS_LOCATION, from, last_token_index, token_id]
+  _HASHMAP_2D_GET_SLOT_FROM_KEYS(0x00)      // [slot, token_id]
+  0x00 swap1 sstore                         // [token_id]
+
+  [OWNED_TOKENS_INDEX_LOCATION]             // [OWNED_TOKENS_INDEX_LOCATION, token_id]
+  swap1 _HASHMAP_GET_SLOT_FROM_KEYS(0x00)   // [slot]
+  0x00 swap1 sstore                         // []
 }
 
 /**********************************************************************
@@ -546,7 +597,7 @@
 /// @notice Returns the number of tokens owned by the given address
 #define macro _ERC721_BALANCE_OF() = takes (1) returns (1) {
   // input stack: [address]
-  [BALANCE_LOCATION]            // [BALANCE_LOCATION, address]
+  [BALANCE_LOCATION]                         // [BALANCE_LOCATION, address]
   swap1                                      // [address, BALANCE_LOCATION]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)          // [balance_slot]
   sload                                      // [balance]
@@ -554,14 +605,14 @@
 
 #define macro _ERC721_GET_APPROVED() = takes(1) returns(0) {
   // input stack: [token_id]
-  [APPROVALS_LOCATION]                  // [APPROVALS_LOCATION, token_id]
+  [APPROVALS_LOCATION]                            // [APPROVALS_LOCATION, token_id]
   swap1                                           // [token_id, APPROVALS_LOCATION]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)               // [slot]
   sload                                           // [approved_spender]
 }
 
 #define macro _ERC721_TOTAL_SUPPLY() = takes(0) returns(1) {
-  [ALL_TOKENS_LOCATION]                  // [ALL_TOKENS_LOCATION]
+  [ALL_TOKENS_LOCATION]                      // [ALL_TOKENS_LOCATION]
   sload                                      // [total_supply]
 }
 
@@ -569,7 +620,7 @@
 /// @notice Returns the owner of the token
 #define macro _ERC721_OWNER_OF() = takes (1) returns(1) {
   // input stack: [token_id]
-  [OWNER_LOCATION]         // [OWNER_LOCATION, token_id]
+  [OWNER_LOCATION]                      // [OWNER_LOCATION, token_id]
   swap1                                 // [token_id, OWNER_LOCATION]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)     // [token_owner_slot]
   sload                                 // [owner]
@@ -577,13 +628,12 @@
 
 #define macro _ERC721_IS_APPROVED_FOR_ALL() = takes(2) returns(1) {
   // input stack: [owner, operator]
-  [OPERATOR_APPROVALS_LOCATION]               // [OPERATOR_APPROVALS_LOCATION, owner, operator]
+  [OPERATOR_APPROVALS_LOCATION]                   // [OPERATOR_APPROVALS_LOCATION, owner, operator]
   _HASHMAP_2D_GET_SLOT_FROM_KEYS(0x00)            // [approval_slot]
   sload                                           // [approved]
 }
 
 // @TODO: Implement safeTransferFrom
-// @TODO: update enumerations on transfer
 #define macro _ERC721_TRANSFER_FROM() = takes(3) returns(0) {
   // input stack: [from, to, token_id]
   swap1                                  // [to, from, token_id]
@@ -617,10 +667,10 @@
   transfer_dest_with_pop:                 // [trash, token_id, from, to]
   pop
 
-  transfer_dest:                           // [token_id, from, to]
+  transfer_dest:                          // [token_id, from, to]
   dup3 dup3 dup3                          // [token_id, from, to, token_id, from, to]
 
-  [OWNER_LOCATION]           // [OWNER_LOCATION, token_id, from, to, token_id, from, to]
+  [OWNER_LOCATION]                        // [OWNER_LOCATION, token_id, from, to, token_id, from, to]
   swap1                                   // [token_id, OWNER_LOCATION, from, to, token_id, from, to]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)       // [token_owner_slot, from, to, token_id, from, to]
   swap1                                   // [from, token_owner_slot, to, token_id, from, to]
@@ -628,7 +678,7 @@
   swap1                                   // [token_owner_slot, to, from, token_id, from, to]
   sstore                                  // [from, token_id, from, to]
 
-  [BALANCE_LOCATION]         // [BALANCE_LOCATION, from, token_id, from, to]
+  [BALANCE_LOCATION]                      // [BALANCE_LOCATION, from, token_id, from, to]
   swap1                                   // [from, BALANCE_LOCATION, token_id, from, to]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)       // [balance_slot, token_id, from, to]
   dup1                                    // [balance_slot, balance_slot, token_id, from, to]
@@ -639,7 +689,7 @@
 
   swap2                                   // [to, from, token_id]
   dup1                                    // [to, to, from, token_id]
-  [BALANCE_LOCATION]         // [BALANCE_LOCATION, to, to, from, token_id]
+  [BALANCE_LOCATION]                      // [BALANCE_LOCATION, to, to, from, token_id]
   swap1                                   // [to, BALANCE_LOCATION, to, from, token_id]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)       // [balance_slot, to, from, token_id]
   dup1                                    // [balance_slot, balance_slot, to, from, token_id]
@@ -648,7 +698,20 @@
   swap1                                   // [balance_slot, prev_balance + 1, to, from, token_id]
   sstore                                  // [to, from, token_id]
 
-  swap1                                   // [from, to, token_id]
+  swap2                                   // [token_id, from, to]
+  swap1                                   // [from, token_id, to]
+  dup2 dup2                               // [from, token_id, from, token_id, to]
+
+  /*
+   * ERC721Enumerable
+  */
+  _ERC721_ENUMERABLE_REMOVE_TOKEN_FROM_OWNER_ENUMERATION() // [from, token_id, to]
+  swap2                                                    // [to, token_id, from]
+  dup2 dup2                                                // [to, token_id, to, token_id, from]
+  _ERC721_ENUMERABLE_ADD_TO_OWNER_ENUMERATIONS()           // [to, token_id, from]
+
+  swap1                                   // [token_id, to, from]
+  swap2                                   // [from, to, token_id]
   __EVENT_HASH(Transfer)                  // [event_hash, from, to, token_id]
   0x00 0x00 log4
 
@@ -688,7 +751,7 @@
 
 #define macro _ONLY_OWNER() = takes(1) returns(0) {
   // input stack: [token_id]
-  [OWNER_LOCATION]              // [OWNER_LOCATION, token_id]
+  [OWNER_LOCATION]                           // [OWNER_LOCATION, token_id]
   swap1                                      // [token_id, OWNER_LOCATION]
   _HASHMAP_GET_SLOT_FROM_KEYS(0x00)          // [owner_slot]
   sload                                      // [owner]  
@@ -703,3 +766,5 @@
 
   continue_jump_dest:
 }
+
+// 0x23b872dd000000000000000000000000be862ad9abfe6f22bcb087716c7d89a26051f74c0000000000000000000000006a1ce1eb90eddffd611e8f1530305304930780b50000000000000000000000000000000000000000000000000000000000000000
